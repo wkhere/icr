@@ -51,6 +51,7 @@ module Icr
     def to_code
       code =
         <<-CRYSTAL
+        #{code_from_rcfile}
         #{code(:require)}
         #{code(:module)}
         #{code(:enum)}
@@ -74,6 +75,18 @@ module Icr
     private def code(command_type, indent_level = 0)
       cmds = @commands.select { |cmd| cmd.type == command_type }.map &.value
       cmds.map { |cmd| ("  " * indent_level) + cmd }.join("\n")
+    end
+
+    private def code_from_rcfile : String
+      begin
+        File.read(File.expand_path("~/.icrrc"))
+      rescue e : Errno
+        if e.errno == Errno::ENOENT
+          return ""
+        else
+          raise e
+        end
+      end
     end
   end
 end
